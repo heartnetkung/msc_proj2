@@ -19,7 +19,7 @@ def bktree(seqs, max_edits=1):
     ans = []
     index = build_index(seqs)
 
-    tree = pybktree.BKTree(distance, np.unique(seqs))
+    tree = pybktree.BKTree(levenshtein_distance, np.unique(seqs))
     for x_index, x_seq in enumerate(seqs):
         for edit_distance, y_seq in tree.find(x_seq, max_edits):
             for y_index in index[y_seq]:
@@ -33,7 +33,7 @@ def bktree_leven_count(seqs, max_edits, distance):
     useqs, counts = np.unique(seqs, return_counts=True)
     index = {useqs[i]: counts[i] for i in range(len(counts))}
 
-    tree = pybktree.BKTree(distance, useqs)
+    tree = pybktree.BKTree(levenshtein_distance, useqs)
     for i, x_seq in enumerate(useqs):
         for edit_distance, y_seq in tree.find(x_seq, max_edits):
             if x_seq != y_seq:
@@ -52,3 +52,8 @@ def bktree_count(seqs, max_edits=1, is_hamming=True):
     for k, g in groupby(data, key=len):
         ans += bktree_leven_count(list(g), max_edits, hamming_distance)
     return ans
+
+# test_input = ['CAAA', 'CDDD', 'CADA', 'CAAK']
+# test_output = [(0, 3, 1),(0, 2, 1), (2, 0, 1), (3, 0, 1)]
+# output = bktree(test_input)
+# assert bktree(test_input) == test_output
