@@ -14,7 +14,8 @@ def precision_at_r(df, cdist, r):
                 denominator += 1
                 if center_epitope == epitopes[j]:
                     numerator += 1
-    return {'precision': numerator/denominator, 'n_prediction': denominator}
+    return {'precision': numerator/denominator,
+            'avg_neighbor': denominator/len(df)}
 
 
 def eval_meysman(df, cluster_col='cluster'):

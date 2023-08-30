@@ -18,4 +18,6 @@ def test_precision():
     seqs = ['CAAA', 'CDDD', 'CADA', 'CAAK']
     cdist = prs.cdist(seqs, seqs)
     df = pd.DataFrame({'epitope': [0, 0, 0, 1]})
-    assert precision_at_r(df, cdist, 1) == 6/8
+    result = precision_at_r(df, cdist, 1)
+    assert result['avg_neighbor'] == 4/4
+    assert result['precision'] == 2/4
