@@ -16,7 +16,7 @@ def read_vdj(filename=None):
     filter1 = df['species'] == 'HomoSapiens'
     filter2 = df['vdjdb.score'] > 0
     filter3 = df['reference.id'] != 'PMID:28636592'
-    filter4 = df['cdr3.beta'].str.match(r'^C[ACDEFGHIKLMNPQRSTVWY]+[FW]$')
+    filter4 = df['cdr3.beta'].str.match(r'^C[ACDEFGHIKLMNPQRSTVWY]{3,23}[FW]$')
     filter5 = df['v.beta'] != ''
     filter6 = df['antigen.epitope'] != ''
 
@@ -29,20 +29,22 @@ def read_vdj(filename=None):
     return df2.rename(columns=fieldmap)[fieldmap.values()]
 
 
-def read_emerson():
+def read_emerson(single_file=False):
     folder = path.abspath(path.join(__file__, '../../../data/emerson'))
     ans = None
     for i, file in enumerate(listdir(folder)):
         df = pd.read_csv(path.abspath(path.join(folder, file)),
                          sep='\t', usecols=['amino_acid', 'v_gene'])
         df.dropna(inplace=True)
-        df = df[df['amino_acid'].str.match(r'^[ACDEFGHIKLMNPQRSTVWY]{5,25}$')]
+        df = df[df['amino_acid'].str.match(r'^C[ACDEFGHIKLMNPQRSTVWY]{3,23}[FW]$')]
         df = df[df['v_gene'].str.contains(r'\-\d\d$')]
         df['file'] = i
         if ans is None:
             ans = df[['amino_acid', 'file', 'v_gene']].reset_index(drop=True)
         else:
             ans = pd.concat([ans, df], copy=False, ignore_index=True)
+        if single_file:
+            break
     fieldmap = {'v_gene': 'vb', 'amino_acid': 'cdr3b', 'file': 'file'}
     return ans.rename(columns=fieldmap)[fieldmap.values()]
 
