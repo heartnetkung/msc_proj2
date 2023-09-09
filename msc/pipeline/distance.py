@@ -84,5 +84,5 @@ def mahalanobis(seqs, M_array):
                 raise Exception('len_x:', len_x, x)
 
             diff = protein_to_atchley(x) - protein_to_atchley(y)
-            ans[i][j] = np.sqrt(diff @ M_array[len_x-11] @ diff)
+            ans[i][j] = np.ceil(np.sqrt(diff @ M_array[len_x-11] @ diff))
     return ans
