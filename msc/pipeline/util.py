@@ -85,7 +85,7 @@ def read_emerson_healthy(single_file=False):
         filter1 = df['templates'] > 6
         filter2 = np.all((df['amino_acid'].str.len()==14,df['templates'] > 4),axis=0)
         filter3 = np.all((df['amino_acid'].str.len()>14,df['templates'] > 1),axis=0)
-        df = df[np.logical_or(filter1,filter2)]
+        df = df[np.logical_or(filter1,filter2,filter3)]
         if ans is None:
             ans = df[['amino_acid', 'file']].reset_index(drop=True)
         else:
