@@ -2,7 +2,6 @@ import time
 import pandas as pd
 import numpy as np
 from os import path, listdir
-import itertools
 
 
 def read_vdj(filename=None):
@@ -14,7 +13,7 @@ def read_vdj(filename=None):
     df = pd.read_csv(file, sep='\t', keep_default_na=False)
 
     filter1 = df['species'] == 'HomoSapiens'
-    filter2 = df['cdr3.beta'].str.match(r'^C[ACDEFGHIKLMNPQRSTVWY]{5,24}[FW]$')
+    filter2 = df['cdr3.beta'].str.match(r'^C[ACDEFGHIKLMNPQRSTVWY]{9,16}[FW]$')
     filter3 = df['v.beta'] != ''
     filter4 = df['antigen.epitope'] != ''
     all_filter = np.all((filter1, filter2, filter3, filter4), axis=0)
@@ -40,7 +39,7 @@ def read_emerson(single_file=False):
                          sep='\t', usecols=['amino_acid', 'v_gene'])
         df.dropna(inplace=True)
         df = df[df['amino_acid'].str.match(
-            r'^C[ACDEFGHIKLMNPQRSTVWY]{5,24}[FW]$')]
+            r'^C[ACDEFGHIKLMNPQRSTVWY]{9,16}[FW]$')]
         df = df[df['v_gene'].str.contains(r'\-\d\d$')]
         df['file'] = i
         if ans is None:
@@ -61,7 +60,7 @@ def read_emerson_healthy(single_file=False):
                          sep='\t', usecols=['amino_acid', 'v_gene'])
         df.dropna(inplace=True)
         df = df[df['amino_acid'].str.match(
-            r'^C[ACDEFGHIKLMNPQRSTVWY]{5,24}[FW]$')]
+            r'^C[ACDEFGHIKLMNPQRSTVWY]{9,16}[FW]$')]
         df = df[df['v_gene'].str.contains(r'\-\d\d$')]
         df['file'] = i
         if ans is None:
