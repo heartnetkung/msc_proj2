@@ -80,7 +80,7 @@ def mahalanobis(seqs, M_array):
                 break
             if len_x != len(y):
                 continue
-            if len_x > 18 or len_x < 11:
+            if len_x > 17 or len_x < 11:
                 raise Exception('len_x:', len_x, x)
 
             diff = protein_to_atchley(x) - protein_to_atchley(y)

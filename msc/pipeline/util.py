@@ -13,7 +13,7 @@ def read_vdj(filename=None):
     df = pd.read_csv(file, sep='\t', keep_default_na=False)
 
     filter1 = df['species'] == 'HomoSapiens'
-    filter2 = df['cdr3.beta'].str.match(r'^C[ACDEFGHIKLMNPQRSTVWY]{9,16}[FW]$')
+    filter2 = df['cdr3.beta'].str.match(r'^C[ACDEFGHIKLMNPQRSTVWY]{9,15}[FW]$')
     filter3 = df['v.beta'] != ''
     filter4 = df['antigen.epitope'] != ''
     all_filter = np.all((filter1, filter2, filter3, filter4), axis=0)
@@ -39,7 +39,7 @@ def read_emerson(single_file=False):
                          sep='\t', usecols=['amino_acid', 'v_gene'])
         df.dropna(inplace=True)
         df = df[df['amino_acid'].str.match(
-            r'^C[ACDEFGHIKLMNPQRSTVWY]{9,16}[FW]$')]
+            r'^C[ACDEFGHIKLMNPQRSTVWY]{9,15}[FW]$')]
         df = df[df['v_gene'].str.contains(r'\-\d\d$')]
         df['file'] = i
         if ans is None:
@@ -53,7 +53,7 @@ def read_emerson(single_file=False):
 
 
 def read_template():
-    _file = path.abspath(path.join(__file__, '../../../data/templategt8.csv'))
+    _file = path.abspath(path.join(__file__, '../../../data/templategt9.csv'))
     return pd.read_csv(_file, index_col=False)
 
 
@@ -78,20 +78,50 @@ def read_emerson_healthy(single_file=False):
         if len(df)==0:
             continue
         df = df[df['amino_acid'].str.match(
-            r'^C[ACDEFGHIKLMNPQRSTVWY]{9,16}[FW]$')].reset_index(drop=True)
+            r'^C[ACDEFGHIKLMNPQRSTVWY]{9,15}[FW]$')].reset_index(drop=True)
 
         df = df.groupby('amino_acid')['templates'].sum().reset_index()
         df['file'] = i
-        filter1 = df['templates'] > 6
-        filter2 = np.all((df['amino_acid'].str.len()==14,df['templates'] > 4),axis=0)
-        filter3 = np.all((df['amino_acid'].str.len()>14,df['templates'] > 1),axis=0)
-        df = df[np.logical_or(filter1,filter2,filter3)]
+        filter1 = df['templates'] > 7
+        filter2 = np.all((df['amino_acid'].str.len()==14,df['templates'] > 5),axis=0)
+        filter3 = np.all((df['amino_acid'].str.len()==15,df['templates'] > 4),axis=0)
+        filter4 = np.all((df['amino_acid'].str.len()==16,df['templates'] > 2),axis=0)
+        filter5 = np.all((df['amino_acid'].str.len()>16,df['templates'] > 1),axis=0)
+        df = df[np.any((filter1,filter2,filter3,filter4,filter5),axis=0)]
         if ans is None:
             ans = df[['amino_acid', 'file']].reset_index(drop=True)
         else:
             ans = pd.concat([ans, df], copy=False, ignore_index=True)
         if single_file:
             break
+    print('total_tcr:',total_tcr)
+    fieldmap = {'amino_acid': 'cdr3b', 'file': 'file'}
+    return ans.rename(columns=fieldmap)[fieldmap.values()]
+
+def read_emerson_negative():
+    folder = path.abspath(path.join(__file__, '../../../../msc_proj/data/emerson'))
+    ans = None
+    files = listdir(folder)[:20]
+    total_tcr = 0
+    for i, file in enumerate(files):
+        print(i/len(files))
+        df = pd.read_csv(path.abspath(path.join(folder, file)),
+                         sep='\t', usecols=['amino_acid','templates'])
+        df['templates'].fillna(1,inplace=True)
+        df.dropna(inplace=True)
+        total_tcr += len(df)
+        if len(df)==0:
+            continue
+        df = df[df['amino_acid'].str.match(
+            r'^C[ACDEFGHIKLMNPQRSTVWY]{9,15}[FW]$')].reset_index(drop=True)
+
+        df = df.groupby('amino_acid')['templates'].sum().reset_index()
+        df['file'] = i
+        df = df[df['templates'] == 1]
+        if ans is None:
+            ans = df[['amino_acid', 'file']].reset_index(drop=True)
+        else:
+            ans = pd.concat([ans, df], copy=False, ignore_index=True)
     print('total_tcr:',total_tcr)
     fieldmap = {'amino_acid': 'cdr3b', 'file': 'file'}
     return ans.rename(columns=fieldmap)[fieldmap.values()]
@@ -113,3 +143,9 @@ def save_pd(df, filename):
     file = path.abspath(
         path.join(__file__, '../../../data/'+filename))
     df.to_csv(file, index=False)
+
+
+def load_pd(filename):
+    file = path.abspath(
+        path.join(__file__, '../../../data/'+filename))
+    return pd.read_csv(file, index_col=False)
