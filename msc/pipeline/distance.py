@@ -69,7 +69,7 @@ def df_to_atchley(dataset):
 def mahalanobis(seqs, M_array):
     _len = len(seqs)
     ans = np.full((_len, _len), 99)
-    assert len(M_array) == 8
+    assert len(M_array) == 7
 
     for i in range(_len):
         for j in range(_len):
